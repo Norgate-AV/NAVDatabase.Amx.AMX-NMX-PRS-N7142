@@ -5,6 +5,7 @@ MODULE_NAME='mAMX-NMX-PRS-N7142' 	(
 
 (***********************************************************)
 #include 'NAVFoundation.ModuleBase.axi'
+#include 'NAVFoundation.SocketUtils.axi'
 
 /*
  _   _                       _          ___     __
@@ -94,7 +95,7 @@ DEFINE_MUTUALLY_EXCLUSIVE
 (* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
 (* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
 define_function Send(char cPayload[]) {
-    NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO, dvPort, cPayload))
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO, dvPort, cPayload))
     send_string dvPort, "cPayload"
     wait 1 iCommandBusy = false
 }
@@ -143,25 +144,25 @@ data_event[dvPort] {
 	    NAVTimelineStart(TL_DRIVE, ltDrive, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
 	}
 
-	NAVLog("NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', 'IP Client Online', ']'")
+	NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', 'IP Client Online', ']'")
     }
     string: {
 	[vdvObject, DEVICE_COMMUNICATING] = true
 	[vdvObject, DATA_INITIALIZED] = true
-	NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM, dvPort, data.text))
+	NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM, dvPort, data.text))
     }
     offline: {
 	iClientConnected = false
 	NAVClientSocketClose(data.device.port)
 	NAVTimelineStop(TL_DRIVE)
 
-	NAVLog("NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', 'IP Client Offline', ']'")
+	NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', 'IP Client Offline', ']'")
     }
     onerror: {
 	iClientConnected = false
 	NAVTimelineStop(TL_DRIVE)
 
-	NAVLog("NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', 'IP Client OnError', ']'")
+	NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', 'IP Client OnError', ']'")
     }
 }
 
@@ -174,7 +175,7 @@ data_event[vdvObject] {
     command: {
 	stack_var char cCmdHeader[NAV_MAX_CHARS]
 	stack_var char cCmdParam[3][NAV_MAX_CHARS]
-	NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
+	NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
 	cCmdHeader = DuetParseCmdHeader(data.text)
 	cCmdParam[1] = DuetParseCmdParam(data.text)
 	cCmdParam[2] = DuetParseCmdParam(data.text)
